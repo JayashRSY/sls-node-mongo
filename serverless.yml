@@ -1,0 +1,50 @@
+service: sls-node-mongo
+frameworkVersion: '3'
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: ap-south-1
+  environment:
+    JWT_SECRET: ${file(./secrets.json):JWT_SECRET}
+    DB: ${file(./secrets.json):DB}
+
+functions:
+  function1:
+    handler: index.handler
+
+  verify-jwt:
+    handler: authentication/VerifyJWT.verify
+
+  register:
+    handler: authentication/AuthenticationHandler.register
+    events:
+      - http:
+          path: auth/register
+          method: post
+          cors: true
+  
+  login:
+    handler: authentication/AuthenticationHandler.login
+    events:
+      - http:
+          path: auth/login
+          method: post
+          cors: true
+  myProfile:
+    handler: authentication/AuthenticationHandler.myProfile
+    events:
+      - http:
+          path: auth/myProfile
+          method: post
+          cors: true
+          authorizer: verify-jwt      
+
+
+
+
+
